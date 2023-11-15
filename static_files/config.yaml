@@ -1,5 +1,6 @@
 # Paths and directories
 data_dir: 'data'
+reports_dir: 'reports'
 
 # Problem parameters
 max_hubs: 3
@@ -9,4 +10,3 @@ second_lagrange: 250
 
 # Solver parameters
 solver: 'aqc'
-aqc_type: 'exact'
