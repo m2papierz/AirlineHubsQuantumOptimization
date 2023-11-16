@@ -7,6 +7,3 @@ max_hubs: 3
 hub_discount: 0.6
 first_lagrange: 150
 second_lagrange: 250
-
-# Solver parameters
-solver: 'aqc'

@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 from hubs_optimization.airline_hubs_problem import AirlineHubsProblemBinary
-from hubs_optimization.solvers import QuadraticModelSolver
-from hubs_optimization.solvers import AnnealingSolver
+from hubs_optimization.solver import QuadraticModelSolver
+from hubs_optimization.solver import AnnealingSolver
 from hubs_optimization.graph_plotting import draw_solution_graph
 from utils import PathsManager, load_file_data
 
@@ -100,9 +100,6 @@ def main():
     config = paths_manager.config
     parser = argparse.ArgumentParser(description="aaa")
 
-    parser.add_argument(
-        '--solver', type=str, default=config.solver, choices=['aqc', 'qaoa', 'gas'],
-        help='')
     parser.add_argument(
         '--max_hubs', type=int, default=config.max_hubs,
         help='')

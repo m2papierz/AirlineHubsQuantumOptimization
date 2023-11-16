@@ -25,6 +25,7 @@ class QuadraticModelSolver:
 class AnnealingSolver(QuadraticModelSolver):
     def __init__(self, discrete: bool = False):
         self.discrete = discrete
+        self.label = 'CQM Airline Hubs'
         super().__init__()
 
     def _initiate_solver(self):
@@ -35,28 +36,8 @@ class AnnealingSolver(QuadraticModelSolver):
 
     def sample(self, quadratic_model: QuadraticModel):
         if self.discrete:
-            return self.solver.sample_dqm(quadratic_model)
+            return self.solver.sample_dqm(
+                quadratic_model, label=self.label)
         else:
-            return self.solver.sample_cqm(quadratic_model)
-
-
-class ApproximateSolver(QuadraticModelSolver):
-    def __init__(self):
-        super().__init__()
-
-    def _initiate_solver(self):
-        pass
-
-    def sample(self, quadratic_model: QuadraticModel):
-        pass
-
-
-class GroverAdaptiveSolver(QuadraticModelSolver):
-    def __init__(self):
-        super().__init__()
-
-    def _initiate_solver(self):
-        pass
-
-    def sample(self, quadratic_model: QuadraticModel):
-        pass
+            return self.solver.sample_cqm(
+                quadratic_model, label=self.label)
