@@ -4,15 +4,17 @@ import itertools
 import numpy as np
 
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union, TypeAlias
 
+from hubs_optimization.solver import QuadraticModelAnnealingSolver
 from hubs_optimization.airline_hubs_problem import AirlineHubsProblemBinary
-from hubs_optimization.solver import QuadraticModelSolver
-from hubs_optimization.solver import AnnealingSolver
+from hubs_optimization.airline_hubs_problem import AirlineHubsProblemDiscrete
 from hubs_optimization.graph_plotting import draw_solution_graph
 from utils import PathsManager, load_file_data
 
 sys.path.insert(1, str(Path(__file__).parent.parent))
+
+AirlineHubsProblem: TypeAlias = Union[AirlineHubsProblemBinary, AirlineHubsProblemDiscrete]
 
 
 def load_airports_data(
@@ -39,44 +41,50 @@ def load_airports_data(
 
 def interpret_results(
         sample_set,
-        airport_names: List[str]
+        airport_names: List[str],
+        discrete: bool
 ) -> Tuple[Dict, List[str], List[Tuple[str, str]]]:
     n = len(airport_names)
     hubs = []
     hubs_connections = []
 
-    assignments = [
-        {i: j for i in range(n) for j in range(n)
-         if sample.sample[i, j] == 1} for sample in sample_set.data()
-    ]
+    if not discrete:
+        sample_set = sample_set.filter(lambda d: d.is_feasible).aggregate()
+        assignments = [
+            {i: j for i in range(n) for j in range(n) if sample.sample[i, j] == 1}
+            for sample in sample_set.data()
+        ]
+        best_sample = assignments[0]
+    else:
+        best_sample = sample_set.first.sample
 
-    for key, val in assignments[0].items():
+    for key, val in best_sample.items():
         if key == val:
             hubs.append(airport_names[key])
         else:
             hubs_connections.append((airport_names[key], airport_names[val]))
 
-    return assignments[0], hubs, hubs_connections
+    return best_sample, hubs, hubs_connections
 
 
 def find_best_solution(
         data: Dict[str, List[float]],
-        problem: AirlineHubsProblemBinary,
-        solver: QuadraticModelSolver,
+        problem: AirlineHubsProblem,
+        solver: QuadraticModelAnnealingSolver,
         reports_dir: Path
 ):
     # Create discrete quadratic model and sample
     quadratic_model = problem.build_quadratic_model()
     sample_set = solver.sample(quadratic_model=quadratic_model)
-    sample_set = sample_set.filter(lambda d: d.is_feasible).aggregate()
 
     # Interpret results
     best_solution, hubs, hubs_connections = interpret_results(
-        sample_set=sample_set, airport_names=list(data.keys()))
+        sample_set=sample_set,
+        airport_names=list(data.keys()),
+        discrete=isinstance(problem, AirlineHubsProblemDiscrete)
+    )
 
     # Save the best solution data
-    reports_dir = reports_dir / solver.__class__.__name__
-    reports_dir.mkdir(exist_ok=True)
     with open(reports_dir / 'best_solution.txt', 'w') as f:
         f.write(
             f'Hubs: {hubs}\n'
@@ -101,6 +109,9 @@ def main():
     parser = argparse.ArgumentParser(description="aaa")
 
     parser.add_argument(
+        '--problem', type=str, default=config.problem, choices=['DQM', 'CQM'],
+        help='')
+    parser.add_argument(
         '--max_hubs', type=int, default=config.max_hubs,
         help='')
     parser.add_argument(
@@ -118,15 +129,25 @@ def main():
     data = load_airports_data(
         data_dir=paths_manager.data_dir())
 
-    problem = AirlineHubsProblemBinary(
-        airports_data=data,
-        max_hubs=args.max_hubs,
-        hub_discount=args.hub_discount,
-        first_constraint_lagrange=args.first_lagrange,
-        second_constraint_lagrange=args.second_lagrange
-    )
+    if args.problem == 'CQM':
+        problem = AirlineHubsProblemBinary(
+            airports_data=data,
+            max_hubs=args.max_hubs,
+            hub_discount=args.hub_discount,
+            first_constraint_lagrange=args.first_lagrange,
+            second_constraint_lagrange=args.second_lagrange
+        )
+        solver = QuadraticModelAnnealingSolver()
+    else:
+        problem = AirlineHubsProblemDiscrete(
+            airports_data=data,
+            max_hubs=args.max_hubs,
+            hub_discount=args.hub_discount,
+            first_constraint_lagrange=args.first_lagrange,
+            second_constraint_lagrange=args.second_lagrange
+        )
+        solver = QuadraticModelAnnealingSolver(discrete=True)
 
-    solver = AnnealingSolver()
     find_best_solution(
         data=data[0],
         problem=problem,

@@ -3,7 +3,10 @@ data_dir: 'data'
 reports_dir: 'reports'
 
 # Problem parameters
-max_hubs: 3
+max_hubs: 4
 hub_discount: 0.6
 first_lagrange: 150
 second_lagrange: 250
+
+# Problem definition and solver
+problem: CQM
