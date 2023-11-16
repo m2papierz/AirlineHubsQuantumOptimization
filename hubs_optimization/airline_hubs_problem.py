@@ -36,17 +36,17 @@ class AirlineHubsProblem:
         self._data = airports_data[0]
         self._max_hubs = max_hubs
         self._discount = hub_discount
-        self._airports_num = len(airports_data)
+        self._airports_num = len(airports_data[0])
 
         self._first_lm = first_constraint_lagrange
         self._second_lm = second_constraint_lagrange
 
         if not custom_data:
-            self._demand_m = airports_data[1]
-            self._cost_m = airports_data[2]
+            self._cost_m = airports_data[1]
+            self._demand_m = airports_data[2]
         else:
-            self._demand_m = self._create_demand_matrix()
             self._cost_m = self._calculate_cost_matrix()
+            self._demand_m = self._create_demand_matrix()
 
     @property
     def max_hubs(self):
