@@ -1,8 +1,11 @@
 import os
+import sys
 import numpy as np
 
 from pathlib import Path
 from omegaconf import OmegaConf
+
+sys.path.insert(1, str(Path(__file__).parent.parent))
 
 
 def load_file_data(file_path: Path) -> np.ndarray:

@@ -1,4 +1,3 @@
-import sys
 import argparse
 import itertools
 import numpy as np
@@ -6,13 +5,11 @@ import numpy as np
 from pathlib import Path
 from typing import Dict, List, Tuple, Union, TypeAlias
 
+from utils import PathsManager, load_file_data
 from hubs_optimization.solver import QuadraticModelAnnealingSolver
 from hubs_optimization.airline_hubs_problem import AirlineHubsProblemBinary
 from hubs_optimization.airline_hubs_problem import AirlineHubsProblemDiscrete
 from hubs_optimization.graph_plotting import draw_solution_graph
-from utils import PathsManager, load_file_data
-
-sys.path.insert(1, str(Path(__file__).parent.parent))
 
 AirlineHubsProblem: TypeAlias = Union[AirlineHubsProblemBinary, AirlineHubsProblemDiscrete]
 
