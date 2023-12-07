@@ -23,3 +23,8 @@ To install all necessary packages, run this line in command line:
 1. Set the parameters in the configuration file `config.yaml`.
 2. Run `run_solver.py`.
 3. The resulting optimal solution is located in the `reports` folder.
+
+Example of the solution graph:
+<p align="center">
+<img src="example_solution.png" width="750">
+</p>
